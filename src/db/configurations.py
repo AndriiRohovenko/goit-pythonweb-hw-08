@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
@@ -16,3 +17,5 @@ connection_string = (
 )
 
 engine = create_engine(connection_string)
+Session = sessionmaker(bind=engine)
+session = Session()

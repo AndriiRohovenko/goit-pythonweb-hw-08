@@ -1,4 +1,4 @@
-from src.db.configurations import engine
+from src.db.configurations import session
 from sqlalchemy import text, select, func
 from sqlalchemy.orm import Session
 
@@ -16,6 +16,6 @@ def check_database_connection(session: Session) -> bool:
 
 if __name__ == "__main__":
 
-    with Session(engine) as session:
+    with session:
         result1 = check_database_connection(session)
         print(result1)
