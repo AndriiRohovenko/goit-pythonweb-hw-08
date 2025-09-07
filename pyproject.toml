@@ -8,18 +8,26 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi (>=0.116.1,<0.117.0)",
     "sqlalchemy (>=2.0.43,<3.0.0)",
     "alembic (>=1.16.5,<2.0.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "uvicorn[standard] (>=0.35.0,<0.36.0)",   
+    "uvicorn[standard] (>=0.35.0,<0.36.0)",
+    "fastapi[standard] (>=0.116.1,<0.117.0)",   
 ]
 
 [tool.poetry]
-package-mode = false 
+package-mode = true
+
+packages = [
+    { include = "src" }
+]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+dev = "src.api.run:dev"
+prod = "src.api.run:prod"
