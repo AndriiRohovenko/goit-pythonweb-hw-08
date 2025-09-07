@@ -19,3 +19,11 @@ connection_string = (
 engine = create_engine(connection_string)
 Session = sessionmaker(bind=engine)
 session = Session()
+
+
+def get_db_session():
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
