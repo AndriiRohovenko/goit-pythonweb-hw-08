@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from src.db.configurations import get_db_session
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -11,9 +11,18 @@ from src.api.exceptions import (
     user_not_found_handler,
     duplicate_email_handler,
 )
-
+import time
 
 app = FastAPI()
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
 
 
 @app.get("/api/healthchecker")
