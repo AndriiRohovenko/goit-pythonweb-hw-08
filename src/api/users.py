@@ -3,22 +3,35 @@ from src.db.configurations import get_db_session
 from src.db.models import User
 from sqlalchemy.orm import Session
 from sqlalchemy import extract, and_, or_
+from typing import Optional
 
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from datetime import date, timedelta
+
+from src.api.exceptions import UserNotFoundError, DuplicateEmailError
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
 class UserSchema(BaseModel):
-    name: str
-    surname: str
-    email: str
+    name: str = Field(
+        ..., max_length=50, description="User's first name", example="John"
+    )
+    surname: str = Field(
+        ..., max_length=50, description="User's surname", example="Doe"
+    )
+    email: EmailStr = Field(
+        ...,
+        max_length=100,
+        description="User's email address",
+        example="john.doe@example.com",
+    )
     birthdate: date = Field(
         ..., description="User's birthdate in YYYY-MM-DD format", example="1990-01-01"
     )
-    additional_info: str | None
+    additional_info: Optional[str] = Field(
+        None, max_length=255, description="Additional information about the user"
+    )
 
 
 @router.get("/", response_model=list[UserSchema])
@@ -35,6 +48,9 @@ async def get_users(db: Session = Depends(get_db_session)):
 
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserSchema, db: Session = Depends(get_db_session)):
+
+    if db.query(User).filter(User.email == user.email).first():
+        raise DuplicateEmailError
     try:
         new_user = User(
             name=user.name,
@@ -58,9 +74,7 @@ async def create_user(user: UserSchema, db: Session = Depends(get_db_session)):
 async def get_user(user_id: int, db: Session = Depends(get_db_session)):
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise UserNotFoundError
     return user
 
 
@@ -70,9 +84,7 @@ async def update_user(
 ):
     existing_user = db.query(User).filter(User.id == user_id).first()
     if existing_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise UserNotFoundError
     try:
         existing_user.name = user.name
         existing_user.surname = user.surname
@@ -93,9 +105,7 @@ async def update_user(
 async def delete_user(user_id: int, db: Session = Depends(get_db_session)):
     existing_user = db.query(User).filter(User.id == user_id).first()
     if existing_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise UserNotFoundError
     try:
         db.delete(existing_user)
         db.commit()

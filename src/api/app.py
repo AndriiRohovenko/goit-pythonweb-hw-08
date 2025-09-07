@@ -5,6 +5,13 @@ from sqlalchemy import text
 
 from src.api.users import router as users_router
 
+from src.api.exceptions import (
+    UserNotFoundError,
+    DuplicateEmailError,
+    user_not_found_handler,
+    duplicate_email_handler,
+)
+
 
 app = FastAPI()
 
@@ -24,6 +31,10 @@ async def healthchecker(db: Session = Depends(get_db_session)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Database connection error: {e}",
         )
+
+
+app.add_exception_handler(UserNotFoundError, user_not_found_handler)
+app.add_exception_handler(DuplicateEmailError, duplicate_email_handler)
 
 
 app.include_router(users_router)

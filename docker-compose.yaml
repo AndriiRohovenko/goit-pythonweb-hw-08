@@ -6,10 +6,10 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     networks:
       - backend
 
@@ -17,7 +17,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: src/api/Dockerfile
+      dockerfile: dockerfile
     depends_on:
       - db
     environment:
@@ -33,3 +33,6 @@ services:
 networks:
   backend:
     driver: bridge
+
+volumes:
+  pgdata:

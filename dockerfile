@@ -10,14 +10,12 @@ RUN apt-get update && apt-get install -y \
     && pip install poetry \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml poetry.lock* ./
+# Copy app code
+COPY . .
 
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-
-# Copy app code
-COPY . .
 
 # Expose port 5000
 EXPOSE 5000
