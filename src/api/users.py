@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from src.db.configurations import get_db_session
 from src.db.models import User
 from sqlalchemy.orm import Session
-from datetime import date
+from sqlalchemy import extract, and_, or_
 
-from pydantic import BaseModel
+
+from pydantic import BaseModel, Field
+from datetime import date, timedelta
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -13,7 +15,9 @@ class UserSchema(BaseModel):
     name: str
     surname: str
     email: str
-    birthdate: date
+    birthdate: date = Field(
+        ..., description="User's birthdate in YYYY-MM-DD format", example="1990-01-01"
+    )
     additional_info: str | None
 
 
@@ -99,4 +103,63 @@ async def delete_user(user_id: int, db: Session = Depends(get_db_session)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting user: {e}",
+        )
+
+
+@router.get("/search/", response_model=list[UserSchema])
+async def search_users(
+    name: str | None = Query(None, description="Filter by name"),
+    surname: str | None = Query(None, description="Filter by surname"),
+    email: str | None = Query(None, description="Filter by email"),
+    db: Session = Depends(get_db_session),
+):
+    try:
+        query = db.query(User)
+        if name:
+            query = query.filter(User.name.ilike(f"%{name}%"))
+        if surname:
+            query = query.filter(User.surname.ilike(f"%{surname}%"))
+        if email:
+            query = query.filter(User.email.ilike(f"%{email}%"))
+        users = query.all()
+        return users
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error searching users: {e}",
+        )
+
+
+@router.get("/upcoming-birthdays/", response_model=list[UserSchema])
+async def get_upcoming_birthdays(
+    db: Session = Depends(get_db_session),
+):
+    try:
+        today = date.today()
+        upcoming = today + timedelta(days=7)
+
+        users = (
+            db.query(User)
+            .filter(
+                or_(
+                    # case when birthdays are in the same month
+                    and_(
+                        extract("month", User.birthdate) == today.month,
+                        extract("day", User.birthdate) >= today.day,
+                        extract("day", User.birthdate) <= upcoming.day,
+                    ),
+                    # case when birthdays are in the next month
+                    and_(
+                        extract("month", User.birthdate) == upcoming.month,
+                        extract("day", User.birthdate) <= upcoming.day,
+                    ),
+                )
+            )
+            .all()
+        )
+        return users
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving upcoming birthdays: {e}",
         )
