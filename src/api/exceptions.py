@@ -15,6 +15,12 @@ class DuplicateEmailError(Exception):
     pass
 
 
+class ServerError(Exception):
+    """Raised for general server errors."""
+
+    pass
+
+
 # --- Handlers ---
 async def user_not_found_handler(request: Request, exc: UserNotFoundError):
     return JSONResponse(
@@ -27,4 +33,11 @@ async def duplicate_email_handler(request: Request, exc: DuplicateEmailError):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"message": "Email already exists"},
+    )
+
+
+async def server_error_handler(request: Request, exc: ServerError):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": "Internal server error"},
     )
