@@ -1,14 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from src.db.configurations import get_db_session
-from src.db.models import User
-from sqlalchemy.orm import Session
-from sqlalchemy import extract, and_, or_
-from typing import Optional
-
-
-from datetime import date, timedelta
-
-from src.api.exceptions import UserNotFoundError, DuplicateEmailError, ServerError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.schemas.users import UserSchema
 from src.services.users import UserService
@@ -17,37 +9,38 @@ from src.repository.users import UserRepository
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
-def get_service(db: Session = Depends(get_db_session)):
+def get_service(
+    skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db_session)
+):
     repo = UserRepository(db)
     return UserService(repo)
 
 
 @router.get("/", response_model=list[UserSchema])
 async def get_users(service: UserService = Depends(get_service)):
-    return service.get_users()
+    return await service.get_users()
 
 
 @router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserSchema, service: UserService = Depends(get_service)):
-    return service.create_user(user)
+    return await service.create_user(user)
 
 
 @router.get("/{user_id}", response_model=UserSchema)
 async def get_user(user_id: int, service: UserService = Depends(get_service)):
-    return service.get_user(user_id)
+    return await service.get_user(user_id)  # <-- await
 
 
 @router.patch("/{user_id}", response_model=UserSchema)
 async def update_user(
     user_id: int, user: UserSchema, service: UserService = Depends(get_service)
 ):
-    user = service.update_user(user_id, user)
-    return user
+    return await service.update_user(user_id, user)  # <-- await
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int, service: UserService = Depends(get_service)):
-    service.delete_user(user_id)
+    await service.delete_user(user_id)  # <-- await
 
 
 @router.get("/search/", response_model=list[UserSchema])
@@ -57,10 +50,9 @@ async def search_users(
     email: str | None = Query(None, description="Filter by email"),
     service: UserService = Depends(get_service),
 ):
-    return service.search_users(name, surname, email)
+    return await service.search_users(name, surname, email)  # <-- await
 
 
 @router.get("/upcoming-birthdays/", response_model=list[UserSchema])
 async def get_upcoming_birthdays(service: UserService = Depends(get_service)):
-
-    return service.upcoming_birthdays()
+    return await service.upcoming_birthdays()

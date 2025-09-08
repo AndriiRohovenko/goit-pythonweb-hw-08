@@ -1,67 +1,73 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import extract, and_, or_
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import extract, and_, or_, select
 from datetime import date, timedelta
 from src.db.models import User
 
 
 class UserRepository:
-    def __init__(self, db: Session):
+
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def get_all(self):
-        return self.db.query(User).all()
+    async def get_all(self):
+        result = await self.db.execute(select(User))
+        return result.scalars().all()
 
-    def get_by_id(self, user_id: int):
-        return self.db.query(User).filter(User.id == user_id).first()
+    async def get_by_id(self, user_id: int):
+        result = await self.db.execute(select(User).filter(User.id == user_id))
+        return result.scalar_one_or_none()
 
-    def get_by_email(self, email: str):
-        return self.db.query(User).filter(User.email == email).first()
+    async def get_by_email(self, email: str):
+        result = await self.db.execute(select(User).filter(User.email == email))
+        return result.scalar_one_or_none()
 
-    def create(self, user: User):
+    async def create(self, user: User):
         self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        await self.db.commit()
+        await self.db.refresh(user)
         return user
 
-    def update(self, existing_user: User, data: dict):
+    async def update(self, existing_user: User, data: dict):
         for field, value in data.items():
             setattr(existing_user, field, value)
-        self.db.commit()
-        self.db.refresh(existing_user)
+        await self.db.commit()
+        await self.db.refresh(existing_user)
         return existing_user
 
-    def delete(self, user: User):
-        self.db.delete(user)
-        self.db.commit()
+    async def delete(self, user: User):
+        await self.db.delete(user)
+        await self.db.commit()
 
-    def search(self, name: str | None, surname: str | None, email: str | None):
-        query = self.db.query(User)
+    async def search(self, name: str | None, surname: str | None, email: str | None):
+        query = select(User)
+
         if name:
-            query = query.filter(User.name.ilike(f"%{name}%"))
+            query = query.where(User.name.ilike(f"%{name}%"))
         if surname:
-            query = query.filter(User.surname.ilike(f"%{surname}%"))
+            query = query.where(User.surname.ilike(f"%{surname}%"))
         if email:
-            query = query.filter(User.email.ilike(f"%{email}%"))
-        return query.all()
+            query = query.where(User.email.ilike(f"%{email}%"))
 
-    def upcoming_birthdays(self):
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def upcoming_birthdays(self):
         today = date.today()
         upcoming = today + timedelta(days=7)
 
-        return (
-            self.db.query(User)
-            .filter(
-                or_(
-                    and_(
-                        extract("month", User.birthdate) == today.month,
-                        extract("day", User.birthdate) >= today.day,
-                        extract("day", User.birthdate) <= upcoming.day,
-                    ),
-                    and_(
-                        extract("month", User.birthdate) == upcoming.month,
-                        extract("day", User.birthdate) <= upcoming.day,
-                    ),
-                )
+        query = select(User).where(
+            or_(
+                and_(
+                    extract("month", User.birthdate) == today.month,
+                    extract("day", User.birthdate) >= today.day,
+                    extract("day", User.birthdate) <= upcoming.day,
+                ),
+                and_(
+                    extract("month", User.birthdate) == upcoming.month,
+                    extract("day", User.birthdate) <= upcoming.day,
+                ),
             )
-            .all()
         )
+
+        result = await self.db.execute(query)
+        return result.scalars().all()

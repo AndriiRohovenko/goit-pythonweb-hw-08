@@ -7,58 +7,55 @@ class UserService:
     def __init__(self, repo: UserRepository):
         self.repo = repo
 
-    def get_users(self):
+    async def get_users(self):
         try:
-            return self.repo.get_all()
+            return await self.repo.get_all()
         except Exception as e:
             raise ServerError from e
 
-    def get_user(self, user_id: int):
-        user = self.repo.get_by_id(user_id)
+    async def get_user(self, user_id: int):
+        user = await self.repo.get_by_id(user_id)
         if user is None:
             raise UserNotFoundError
-        try:
-            return user
-        except Exception as e:
-            raise ServerError from e
+        return user
 
-    def create_user(self, data):
-        if self.repo.get_by_email(data.email):
+    async def create_user(self, data):
+        if await self.repo.get_by_email(data.email):
             raise DuplicateEmailError
         try:
             new_user = User(**data.dict())
-            return self.repo.create(new_user)
+            return await self.repo.create(new_user)
         except Exception as e:
             raise ServerError from e
 
-    def update_user(self, user_id: int, data):
-        existing = self.repo.get_by_id(user_id)
-        if not existing or existing is None:
+    async def update_user(self, user_id: int, data):
+        existing = await self.repo.get_by_id(user_id)
+        if not existing:
             raise UserNotFoundError
-        if self.repo.get_by_email(data.email) and existing.email != data.email:
+        if await self.repo.get_by_email(data.email) and existing.email != data.email:
             raise DuplicateEmailError
         try:
-            return self.repo.update(existing, data.dict())
+            return await self.repo.update(existing, data.dict())
         except Exception as e:
             raise ServerError from e
 
-    def delete_user(self, user_id: int):
-        existing = self.repo.get_by_id(user_id)
-        if not existing or existing is None:
+    async def delete_user(self, user_id: int):
+        existing = await self.repo.get_by_id(user_id)
+        if not existing:
             raise UserNotFoundError
         try:
-            self.repo.delete(existing)
+            await self.repo.delete(existing)
         except Exception as e:
             raise ServerError from e
 
-    def search_users(self, name, surname, email):
+    async def search_users(self, name, surname, email):
         try:
-            return self.repo.search(name, surname, email)
+            return await self.repo.search(name, surname, email)
         except Exception as e:
             raise ServerError from e
 
-    def upcoming_birthdays(self):
+    async def upcoming_birthdays(self):
         try:
-            return self.repo.upcoming_birthdays()
+            return await self.repo.upcoming_birthdays()
         except Exception as e:
             raise ServerError from e
