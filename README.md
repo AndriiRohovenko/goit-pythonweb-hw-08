@@ -30,3 +30,9 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
 ```
+
+## Additional info
+
+    poetry run dev - command to start the API server locally with autoreload for development
+
+    poetry run prod - command to start the API server locally without autoreload
