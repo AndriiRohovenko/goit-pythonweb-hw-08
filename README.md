@@ -26,9 +26,9 @@ Create a `.env` file with:
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=postgres
-DB_HOST=localhost
+DB_HOST=db
 DB_PORT=5432
-DB_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
+DB_URL=postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 ```
 
 ## Additional info
