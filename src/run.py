@@ -1,9 +1,18 @@
 import uvicorn
+from dotenv import load_dotenv
+import os
 
 
 def dev():
-    uvicorn.run("src.main:app", host="127.0.0.1", port=8001, reload=True)
+    load_dotenv(".env.dev")
+    api_host = os.getenv("API_HOST")
+    api_port = int(os.getenv("API_PORT"))
+
+    uvicorn.run("src.main:app", host=api_host, port=api_port, reload=True)
 
 
 def prod():
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8000)
+    load_dotenv(".env")
+    api_host = os.getenv("API_HOST")
+    api_port = int(os.getenv("API_PORT"))
+    uvicorn.run("src.main:app", host=api_host, port=api_port)
