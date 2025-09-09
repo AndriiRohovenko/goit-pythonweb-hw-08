@@ -21,4 +21,4 @@ RUN poetry config virtualenvs.create false \
 EXPOSE 5000
 
 # Start the API
-CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "5000"]

@@ -18,7 +18,9 @@ class DuplicateEmailError(Exception):
 class ServerError(Exception):
     """Raised for general server errors."""
 
-    pass
+    def __init__(self, message="Internal server error"):
+        super().__init__(message)
+        self.message = message
 
 
 # --- Handlers ---
@@ -39,5 +41,5 @@ async def duplicate_email_handler(request: Request, exc: DuplicateEmailError):
 async def server_error_handler(request: Request, exc: ServerError):
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"message": "Internal server error"},
+        content={"message": exc.message},
     )
