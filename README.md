@@ -53,16 +53,16 @@ To build and start the app with Docker Compose:
 
 docker compose up -d --build
 
-💻 Run Locally with Poetry
+## 💻 Run Locally with Poetry
 
-First, install dependencies:
+- First, install dependencies:
 
-poetry install
+1. poetry install
+2. run postgres db
+3. Setup .env.dev file
+4. ➤ Start the development server (auto-reload):
+   - poetry run dev
 
-➤ Start the development server (auto-reload):
-
-poetry run dev
-
-➤ Start the production server (no reload):
+- OR Start the production server (no reload):
 
 poetry run prod
