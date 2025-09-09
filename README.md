@@ -31,6 +31,8 @@ DB_PORT=5432
 DB_URL=postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 ```
 
+RUN -> docker compose up -d --build
+
 ## Additional info
 
     poetry run dev - command to start the API server locally with autoreload for development
