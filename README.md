@@ -3,38 +3,66 @@
 REST API project using **FastAPI** with **PostgreSQL**.  
 Managed with **Poetry** and runnable via **Docker Compose**.
 
-## Features
+## 🚀 Features
 
-- Async API using FastAPI
-- PostgreSQL database
-- Alembic migrations
-- Async SQLAlchemy ORM
-- User management with CRUD, search, and upcoming birthdays
-- Custom error handling
+- ✅ Async API with FastAPI
+- ✅ PostgreSQL database
+- ✅ Alembic migrations
+- ✅ Async SQLAlchemy ORM
+- ✅ User management (CRUD, search, upcoming birthdays)
+- ✅ Custom error handling
 
-## Requirements
+---
 
-- Python >= 3.11
+## 📦 Requirements
+
+- Python 3.11+
 - Poetry
 - Docker & Docker Compose
 
-## Environment Variables
+---
 
-Create a `.env` file with:
+## ⚙️ Environment Variables
 
-```env
+Create a `.env` file in the root directory with the following content:
+
+````env
+DB_HOST=db
+DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_NAME=postgres
-DB_HOST=db
+
+API_HOST=0.0.0.0
+API_PORT=5000
+
+```For development, you can also create a .env.dev with:
+DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_URL=postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-```
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=postgres
 
-RUN -> docker compose up -d --build
+API_HOST=127.0.0.1
+API_PORT=8001
+````
 
-## Additional info
+## Run with Docker
 
-    poetry run dev - command to start the API server locally with autoreload for development
+To build and start the app with Docker Compose:
 
-    poetry run prod - command to start the API server locally without autoreload
+docker compose up -d --build
+
+💻 Run Locally with Poetry
+
+First, install dependencies:
+
+poetry install
+
+➤ Start the development server (auto-reload):
+
+poetry run dev
+
+➤ Start the production server (no reload):
+
+poetry run prod
