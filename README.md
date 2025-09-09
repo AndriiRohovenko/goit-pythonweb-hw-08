@@ -1,1 +1,32 @@
-# goit_pythonweb_hw_08
+# GoIt PythonWeb HW-08
+
+REST API project using **FastAPI** with **PostgreSQL**.  
+Managed with **Poetry** and runnable via **Docker Compose**.
+
+## Features
+
+- Async API using FastAPI
+- PostgreSQL database
+- Alembic migrations
+- Async SQLAlchemy ORM
+- User management with CRUD, search, and upcoming birthdays
+- Custom error handling
+
+## Requirements
+
+- Python >= 3.11
+- Poetry
+- Docker & Docker Compose
+
+## Environment Variables
+
+Create a `.env` file with:
+
+```env
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
+```
